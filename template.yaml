@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: LLM Agent using AWS Bedrock and DynamoDB
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.9
+    MemorySize: 512
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref AgentSessionsTable
+
+Parameters:
+  BedrockModelId:
+    Type: String
+    Default: anthropic.claude-v2
+    Description: Bedrock model ID to use
+
+Resources:
+  LLMAgentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: LLMAgentFunction
+      CodeUri: src/
+      Handler: app.lambda_handler
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}
+            - DynamoDBCrudPolicy:
+                TableName: !Ref AgentSessionsTable
+        - AWSLambdaBasicExecutionRole
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /chat
+            Method: post
+            RestApiId: !Ref LLMAgentApi
+
+  AgentSessionsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: LLMAgentSessions
+      PrimaryKey:
+        Name: sessionId
+        Type: String
+      SSESpecification:
+        SSEEnabled: true
+
+  LLMAgentApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${LLMAgentApi}.execute-api.${AWS::Region}.amazonaws.com/prod/chat"
+  LambdaFunctionName:
+    Description: "Lambda Function Name"
+    Value: !Ref LLMAgentFunction
+  DynamoDBTableName:
+    Description: "DynamoDB Table Name"
+    Value: !Ref AgentSessionsTable
