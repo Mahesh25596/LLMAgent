@@ -35,14 +35,12 @@ cd llm-agent-sam
 # Build the application
 sam build
 
-# Deploy with guided configuration
-sam deploy --guided
-
-# Follow the prompts:
-# Stack Name: llm-agent-stack
-# AWS Region: us-east-1
-# Confirm changes: y
-# Allow IAM role creation: Y
+# Deploy the configuration
+sam deploy \
+  --stack-name llm-agent-stack \
+  --s3-bucket sam-deploy-1764459000-f28996da \
+  --region us-east-1 \
+  --capabilities CAPABILITY_IAM
 ```
 
 

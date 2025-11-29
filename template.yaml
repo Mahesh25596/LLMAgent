@@ -5,7 +5,7 @@ Description: LLM Agent using AWS Bedrock and DynamoDB
 Globals:
   Function:
     Timeout: 30
-    Runtime: python3.9
+    Runtime: python3.10
     MemorySize: 512
     Environment:
       Variables:
@@ -14,7 +14,7 @@ Globals:
 Parameters:
   BedrockModelId:
     Type: String
-    Default: anthropic.claude-v2
+    Default: amazon.titan-text-express-v1
     Description: Bedrock model ID to use
 
 Resources:
@@ -25,15 +25,9 @@ Resources:
       CodeUri: src/
       Handler: app.lambda_handler
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - bedrock:InvokeModel
-              Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}
-            - DynamoDBCrudPolicy:
-                TableName: !Ref AgentSessionsTable
         - AWSLambdaBasicExecutionRole
+        - AmazonDynamoDBFullAccess
+        - AmazonBedrockFullAccess
       Events:
         ApiEvent:
           Type: Api
