@@ -41,6 +41,15 @@ sam deploy \
   --s3-bucket sam-deploy-1764459000-f28996da \
   --region us-east-1 \
   --capabilities CAPABILITY_IAM
+
+
+#Test
+API_URL=$(aws cloudformation describe-stacks --stack-name llm-agent-stack --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
+
+ curl -X POST $API_URL   -H "Content-Type: application/json"   -d '{
+    "message": "What is Python programming language used for?",
+    "session_id": "test-session-123"
+  }'
 ```
 
 
