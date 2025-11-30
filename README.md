@@ -37,8 +37,8 @@ sam build
 
 # Deploy the configuration
 sam deploy \
-  --stack-name llm-agent-stack \
-  --s3-bucket sam-deploy-1764459000-f28996da \
+  --stack-name $Stack_Name$ \
+  --s3-bucket $Bucket_Name$ \
   --region us-east-1 \
   --capabilities CAPABILITY_IAM
 
